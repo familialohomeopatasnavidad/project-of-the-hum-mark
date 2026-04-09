@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Small Loans, Big Change</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html, body { height:100%; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; overflow:hidden; }
+  #slideshow { width:100%; height:100vh; position:relative; overflow:hidden; }
+
+  .slide {
+    position:absolute; inset:0;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    padding:2rem 2rem 5rem;
+    opacity:0; pointer-events:none;
+    transform:translateX(55px);
+    transition:opacity 0.42s ease,transform 0.42s ease;
+    overflow-y:auto;
+  }
+  .slide.active { opacity:1; pointer-events:all; transform:translateX(0); }
+  .slide.exit-left { opacity:0; transform:translateX(-55px); transition:opacity 0.3s ease,transform 0.3s ease; }
+
+  .slide-1  { background:linear-gradient(135deg,#3C3489,#7F77DD); }
+  .slide-2  { background:linear-gradient(135deg,#085041,#1D9E75); }
+  .slide-3  { background:linear-gradient(135deg,#0C447C,#378ADD); }
+  .slide-4  { background:linear-gradient(135deg,#3B6D11,#639922); }
+  .slide-5  { background:linear-gradient(135deg,#633806,#BA7517); }
+  .slide-6  { background:linear-gradient(135deg,#993C1D,#D85A30); }
+  .slide-7  { background:linear-gradient(135deg,#26215C,#534AB7); }
+  .slide-8  { background:linear-gradient(135deg,#04342C,#1D9E75); }
+  .slide-9  { background:linear-gradient(135deg,#042C53,#185FA5); }
+  .slide-10 { background:linear-gradient(135deg,#501313,#A32D2D); }
+  .slide-11 { background:linear-gradient(135deg,#173404,#3B6D11); }
+  .slide-12 { background:linear-gradient(135deg,#2C2C2A,#5F5E5A); }
+
+  .badge { display:inline-block; background:rgba(255,255,255,0.18); border:1px solid rgba(255,255,255,0.28); border-radius:999px; padding:0.28rem 0.9rem; font-size:0.78rem; color:rgba(255,255,255,0.85); margin-bottom:1.1rem; letter-spacing:0.05em; text-transform:uppercase; }
+  .slide-title { font-size:clamp(2rem,6vw,4rem); font-weight:700; color:#fff; text-align:center; margin-bottom:0.8rem; line-height:1.2; }
+  .slide-sub   { font-size:clamp(1rem,2.4vw,1.25rem); color:rgba(255,255,255,0.82); text-align:center; max-width:540px; line-height:1.6; margin-bottom:1.6rem; }
+  .slide-h     { font-size:clamp(1.4rem,3.6vw,2.2rem); font-weight:700; color:#fff; text-align:center; margin-bottom:1.3rem; }
+
+  /* Cards */
+  .card { background:rgba(255,255,255,0.15); border:1px solid rgba(255,255,255,0.22); border-radius:16px; padding:1.2rem 1.5rem; color:#fff; width:100%; max-width:600px; transition:transform 0.2s,background 0.2s; }
+  .card:hover { transform:translateY(-4px); background:rgba(255,255,255,0.22); }
+  .card li, .card p { font-size:clamp(0.92rem,2.2vw,1.06rem); line-height:1.8; color:rgba(255,255,255,0.9); }
+  .card ul { padding-left:1.15rem; }
+  .card li { margin-bottom:0.35rem; }
+
+  /* Two col */
+  .two-col { display:grid; grid-template-columns:1fr 1fr; gap:1rem; width:100%; max-width:700px; }
+  @media(max-width:540px){ .two-col { grid-template-columns:1fr; } }
+
+  /* Box grid */
+  .box-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:0.9rem; width:100%; max-width:720px; }
+  .box { background:rgba(255,255,255,0.15); border:1px solid rgba(255,255,255,0.22); border-radius:16px; padding:1.3rem 1rem; color:#fff; text-align:center; transition:transform 0.2s,background 0.2s; }
+  .box:hover { transform:scale(1.06); background:rgba(255,255,255,0.24); }
+  .box-icon  { font-size:2rem; display:block; margin-bottom:0.5rem; }
+  .box-label { font-weight:600; font-size:0.97rem; display:block; margin-bottom:0.25rem; }
+  .box p { font-size:0.85rem; color:rgba(255,255,255,0.8); }
+
+  /* Steps */
+  .steps { display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:0.85rem; width:100%; max-width:700px; margin-top:1.1rem; }
+  .step { background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.2); border-radius:14px; padding:1.1rem 0.8rem; text-align:center; color:#fff; opacity:0; transform:translateY(20px); transition:opacity 0.38s,transform 0.38s,background 0.2s; }
+  .step.show { opacity:1; transform:translateY(0); }
+  .step:hover { background:rgba(255,255,255,0.22); }
+  .step-ico { font-size:1.65rem; display:block; margin-bottom:0.4rem; }
+  .step p { font-size:0.87rem; line-height:1.4; }
+
+  /* Culture */
+  .culture-list { display:flex; flex-direction:column; gap:0.75rem; width:100%; max-width:600px; }
+  .ci { display:flex; gap:0.9rem; align-items:flex-start; background:rgba(255,255,255,0.13); border:1px solid rgba(255,255,255,0.2); border-radius:14px; padding:1rem 1.2rem; transition:background 0.2s,transform 0.15s; }
+  .ci:hover { background:rgba(255,255,255,0.22); transform:translateX(5px); }
+  .ci-ico { font-size:1.5rem; flex-shrink:0; }
+  .ci h3 { font-size:0.97rem; font-weight:600; color:#fff; margin-bottom:0.2rem; }
+  .ci p  { font-size:0.88rem; line-height:1.55; color:rgba(255,255,255,0.82); }
+
+  /* Topic grid */
+  .topic-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(175px,1fr)); gap:0.9rem; width:100%; max-width:720px; }
+  .topic { background:rgba(255,255,255,0.13); border:1px solid rgba(255,255,255,0.2); border-radius:16px; padding:1.2rem 1.1rem; color:#fff; transition:transform 0.2s,background 0.2s; }
+  .topic:hover { transform:translateY(-4px); background:rgba(255,255,255,0.22); }
+  .topic-n { font-size:1.7rem; font-weight:700; opacity:0.38; display:block; margin-bottom:0.35rem; }
+  .topic-t { font-size:0.98rem; font-weight:600; display:block; margin-bottom:0.35rem; }
+  .topic p { font-size:0.87rem; line-height:1.55; color:rgba(255,255,255,0.82); }
+
+  /* Pull quote */
+  .pq { font-size:clamp(1rem,2.4vw,1.25rem); color:rgba(255,255,255,0.88); font-style:italic; text-align:center; max-width:520px; border-left:4px solid rgba(255,255,255,0.35); padding-left:1.1rem; margin:1rem 0; line-height:1.7; }
+
+  /* Buttons */
+  .btn { display:inline-block; background:#fff; color:#3C3489; font-size:1rem; font-weight:600; padding:0.75rem 2.1rem; border-radius:999px; border:none; cursor:pointer; transition:transform 0.15s,box-shadow 0.15s; text-decoration:none; }
+  .btn:hover { transform:scale(1.05); box-shadow:0 6px 20px rgba(0,0,0,0.2); }
+  .btn:active { transform:scale(0.97); }
+
+  /* Avatar */
+  .avatar { width:80px; height:80px; border-radius:50%; background:rgba(255,255,255,0.18); border:3px solid rgba(255,255,255,0.38); display:flex; align-items:center; justify-content:center; font-size:2.5rem; margin-bottom:1.1rem; }
+
+  /* Sources */
+  .sources { list-style:none; width:100%; max-width:580px; }
+  .sources li { margin-bottom:0.6rem; }
+  .sources a { display:flex; align-items:center; gap:0.7rem; color:rgba(255,255,255,0.9); text-decoration:none; background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.2); border-radius:12px; padding:0.75rem 1.1rem; font-size:0.93rem; transition:background 0.2s,transform 0.15s; }
+  .sources a:hover { background:rgba(255,255,255,0.22); transform:translateX(6px); }
+  .sdot { width:6px; height:6px; border-radius:50%; background:rgba(255,255,255,0.5); flex-shrink:0; }
+
+  /* Nav */
+  #nav { position:fixed; bottom:1.1rem; left:50%; transform:translateX(-50%); display:flex; align-items:center; gap:0.8rem; z-index:100; background:rgba(0,0,0,0.38); backdrop-filter:blur(10px); border:1px solid rgba(255,255,255,0.15); border-radius:999px; padding:0.5rem 1rem; }
+  #nav button { background:transparent; border:none; color:#fff; font-size:1.3rem; cursor:pointer; padding:0.2rem 0.4rem; border-radius:8px; transition:background 0.15s; line-height:1; }
+  #nav button:hover { background:rgba(255,255,255,0.15); }
+  #nav button:disabled { opacity:0.25; cursor:default; }
+  #sc { color:rgba(255,255,255,0.85); font-size:0.85rem; min-width:42px; text-align:center; }
+  #dots { display:flex; gap:5px; align-items:center; }
+  .dot { width:6px; height:6px; border-radius:50%; background:rgba(255,255,255,0.3); cursor:pointer; transition:background 0.2s,transform 0.2s; }
+  .dot.active { background:#fff; transform:scale(1.4); }
+
+  /* Progress */
+  #bar { position:fixed; top:0; left:0; height:3px; background:rgba(255,255,255,0.65); transition:width 0.4s ease; z-index:200; }
+  #hint { position:fixed; top:0.8rem; right:1rem; color:rgba(255,255,255,0.38); font-size:0.7rem; z-index:100; }
+
+  @media(max-width:580px){
+    .slide { padding:1rem 1rem 5rem; }
+    .box-grid { grid-template-columns:1fr 1fr; }
+    #hint { display:none; }
+  }
+</style>
+</head>
+<body>
+<div id="bar"></div>
+<div id="hint">← → to navigate</div>
+<div id="slideshow">
+
+<!-- 1 Title -->
+<section class="slide slide-1 active">
+  <div class="badge">Gabriel Rojas · 22/03/2026</div>
+  <h1 class="slide-title">Kiva: How Small Loans<br>Change Lives</h1>
+  <p class="slide-sub">The story of Shameca and how she build her business, Discreet Reports LLC</p>
+  <button class="btn" onclick="goTo(1)">Start ➜</button>
+</section>
+
+<!-- 2 Meet Shameca -->
+<section class="slide slide-2">
+  <span class="badge">2 / 12</span>
+  <div class="avatar">👩🏾‍💼</div>
+  <h2 class="slide-h">Meet Shameca</h2>
+  <div class="card">
+    <ul>
+      <li>She is a entrepreneur who start Discreet Reports LLC</li>
+      <li>Her goal is to help her community and take care of her family</li>
+      <li>She saw people dont have easy, private access to testing services</li>
+      <li>Like many people, she struggled to find money to begin</li>
+    </ul>
+  </div>
+</section>
+
+<!-- 3 What We're Looking Into -->
+<section class="slide slide-3">
+  <span class="badge">3 / 12</span>
+  <h2 class="slide-h">What We're Looking Into 🔍</h2>
+  <div class="topic-grid">
+    <div class="topic">
+      <span class="topic-n">01</span>
+      <span class="topic-t">How Much to Start?</span>
+      <p>Equipment, vehicle, and permits — how much money she really need?</p>
+    </div>
+    <div class="topic">
+      <span class="topic-n">02</span>
+      <span class="topic-t">Why a Microloan?</span>
+      <p>What make a small loan better than going to a regular bank?</p>
+    </div>
+    <div class="topic">
+      <span class="topic-n">03</span>
+      <span class="topic-t">Mobile Service</span>
+      <p>How does going to the people help with privacy and access?</p>
+    </div>
+  </div>
+</section>
+
+<!-- 4 The Business -->
+<section class="slide slide-4">
+  <span class="badge">4 / 12</span>
+  <h2 class="slide-h">Discreet Reports LLC</h2>
+  <p class="slide-sub" style="font-size:0.92rem; margin-bottom:1.1rem;">She always put clients privacy first and make sure they feel safe</p>
+  <div class="box-grid">
+    <div class="box"><span class="box-icon">🧬</span><span class="box-label">DNA Testing</span><p>Fast results</p></div>
+    <div class="box"><span class="box-icon">🧪</span><span class="box-label">Drug Testing</span><p>Work or personal</p></div>
+    <div class="box"><span class="box-icon">📋</span><span class="box-label">Background Checks</span><p>Safe &amp; discreet</p></div>
+    <div class="box"><span class="box-icon">🖐️</span><span class="box-label">Fingerprinting</span><p>Quick &amp; official</p></div>
+  </div>
+  <p style="color:rgba(255,255,255,0.65); font-size:0.85rem; margin-top:1rem;">Goal: open her own office one day 🏢</p>
+</section>
+
+<!-- 5 The Problem -->
+<section class="slide slide-5">
+  <span class="badge">5 / 12</span>
+  <h2 class="slide-h">The Problem She Saw</h2>
+  <div class="box-grid" style="grid-template-columns:repeat(auto-fit,minmax(185px,1fr));">
+    <div class="box"><span class="box-icon">🚫</span><span class="box-label">No Easy Access</span><p>Testing wasnt close or easy for people in the community</p></div>
+    <div class="box"><span class="box-icon">🔒</span><span class="box-label">Privacy Matters</span><p>People dont want others to know they business</p></div>
+    <div class="box"><span class="box-icon">💸</span><span class="box-label">No Money to Start</span><p>Equipment and permits cost alot and banks say no</p></div>
+  </div>
+</section>
+
+<!-- 6 Why Microloan -->
+<section class="slide slide-6">
+  <span class="badge">6 / 12</span>
+  <h2 class="slide-h">Why a Microloan? 🏦</h2>
+  <div class="two-col">
+    <div class="card">
+      <ul>
+        <li>She dont have enough money to start on her own</li>
+        <li>Banks are hard — you need credit history or collateral</li>
+        <li>Shameca face this same problem like many others</li>
+      </ul>
+    </div>
+    <div class="card">
+      <ul>
+        <li>Microloans give money to people banks usually ignore</li>
+        <li>No collateral needed — just a good idea</li>
+        <li>It help alot of people like her get a real chance</li>
+      </ul>
+    </div>
+  </div>
+  <div class="pq">"It's the push needed to start working, earn money, and help others."</div>
+</section>
+
+<!-- 7 How It Help -->
+<section class="slide slide-7">
+  <span class="badge">7 / 12</span>
+  <h2 class="slide-h">How The Loan Help Her</h2>
+  <p class="slide-sub" style="font-size:0.9rem; margin-bottom:0.8rem;">Click to see what she could do 👇</p>
+  <button class="btn" id="revealBtn" onclick="revealSteps()">Click to See ✨</button>
+  <div class="steps" id="stepsGrid">
+    <div class="step" id="s1"><span class="step-ico">🛠️</span><p>Buy equipment for the van</p></div>
+    <div class="step" id="s2"><span class="step-ico">📄</span><p>Get permits and certifications</p></div>
+    <div class="step" id="s3"><span class="step-ico">🚀</span><p>Launch the business</p></div>
+    <div class="step" id="s4"><span class="step-ico">💰</span><p>Steady income for her family</p></div>
+    <div class="step" id="s5"><span class="step-ico">❤️</span><p>Help the community</p></div>
+  </div>
+</section>
+
+<!-- 8 Mobile Service -->
+<section class="slide slide-8">
+  <span class="badge">8 / 12</span>
+  <h2 class="slide-h">The Mobile Service 🚐</h2>
+  <div class="two-col">
+    <div class="card">
+      <ul>
+        <li>She go to the people — they dont have to travel</li>
+        <li>This make things more easy and save time</li>
+        <li>Good for people who cant move around</li>
+      </ul>
+    </div>
+    <div class="card">
+      <ul>
+        <li>People like the privacy of a mobile service</li>
+        <li>No one see them going to a testing place</li>
+        <li>Fast and flexible — she work around your schedule</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- 9 Economy & Geography -->
+<section class="slide slide-9">
+  <span class="badge">9 / 12</span>
+  <h2 class="slide-h">Geography &amp; Economy 🇺🇸</h2>
+  <div class="box-grid" style="grid-template-columns:repeat(auto-fit,minmax(175px,1fr));">
+    <div class="box"><span class="box-icon">🏭</span><span class="box-label">Service Economy</span><p>The U.S. rely more on services than factories now</p></div>
+    <div class="box"><span class="box-icon">🏪</span><span class="box-label">Small Business Matter</span><p>They create jobs and help communities grow</p></div>
+    <div class="box"><span class="box-icon">📈</span><span class="box-label">More People Starting</span><p>Women and diverse entrepreneurs are growing fast</p></div>
+  </div>
+</section>
+
+<!-- 10 Rules & Culture -->
+<section class="slide slide-10">
+  <span class="badge">10 / 12</span>
+  <h2 class="slide-h">Rules &amp; Local Culture ⚖️</h2>
+  <div class="culture-list">
+    <div class="ci"><span class="ci-ico">🔐</span><div><h3>Privacy Laws</h3><p>Very strict laws protect personal data and DNA. She must follow all legal rules and get clear permission from clients.</p></div></div>
+    <div class="ci"><span class="ci-ico">🏛️</span><div><h3>Government Programs</h3><p>Federal, state, and local governments all have different rules. But there are programs to help small businesses like hers.</p></div></div>
+    <div class="ci"><span class="ci-ico">💪</span><div><h3>Work Values</h3><p>In the U.S., hard work and independence is valued alot. This build trust with clients and make the business look more professional.</p></div></div>
+  </div>
+</section>
+
+<!-- 11 Conclusion -->
+<section class="slide slide-11">
+  <span class="badge">11 / 12</span>
+  <h2 class="slide-h">Conclusion 🌟</h2>
+  <div class="card" style="max-width:580px; margin-bottom:1rem;">
+    <ul>
+      <li>Microloans give a real chance to people banks ignore</li>
+      <li>It help Shameca start something big with small money</li>
+      <li>When she succeed, her whole neighborhood benefit</li>
+      <li>Small help can make a real big change</li>
+    </ul>
+  </div>
+  <div class="pq">"Microloans help turn a good idea into a real business."</div>
+  <button class="btn" style="margin-top:1rem;" onclick="goTo(11)">See Sources ➜</button>
+</section>
+
+<!-- 12 Sources -->
+<section class="slide slide-12">
+  <span class="badge">12 / 12</span>
+  <h2 class="slide-h">Sources 📚</h2>
+  <ul class="sources">
+    <li><a href="https://www.kiva.org/" target="_blank"><span class="sdot"></span>Kiva.org — Microloan platform for entrepreneurs</a></li>
+    <li><a href="https://www.sba.gov/funding-programs/loans/microloans" target="_blank"><span class="sdot"></span>SBA Microloans Program</a></li>
+    <li><a href="https://www.sba.gov/funding-programs/loans" target="_blank"><span class="sdot"></span>SBA Loans Overview</a></li>
+    <li><a href="https://www.nerdwallet.com/article/small-business/microloans" target="_blank"><span class="sdot"></span>SBA Microloans Explained — NerdWallet</a></li>
+    <li><a href="https://discreet-reports.com/" target="_blank"><span class="sdot"></span>Discreet Reports LLC — Shameca's business</a></li>
+  </ul>
+  <button class="btn" style="margin-top:1.2rem;" onclick="goTo(0)">⟳ Start Over</button>
+</section>
+
+</div>
+
+<nav id="nav">
+  <button id="prevBtn" onclick="prevSlide()" disabled>←</button>
+  <div id="dots"></div>
+  <span id="sc">1 / 12</span>
+  <button id="nextBtn" onclick="nextSlide()">→</button>
+</nav>
+
+<script>
+  let cur = 0;
+  const total = 12;
+  const slides = document.querySelectorAll('.slide');
+  const bar = document.getElementById('bar');
+  const dotsEl = document.getElementById('dots');
+
+  for (let i = 0; i < total; i++) {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i === 0 ? ' active' : '');
+    d.onclick = () => goTo(i);
+    dotsEl.appendChild(d);
+  }
+
+  function ui() {
+    document.getElementById('sc').textContent = (cur+1)+' / '+total;
+    document.getElementById('prevBtn').disabled = cur === 0;
+    document.getElementById('nextBtn').disabled = cur === total-1;
+    document.querySelectorAll('.dot').forEach((d,i) => d.classList.toggle('active', i===cur));
+    bar.style.width = ((cur+1)/total*100)+'%';
+  }
+
+  function goTo(n) {
+    if (n === cur) return;
+    slides[cur].classList.remove('active');
+    slides[cur].classList.add('exit-left');
+    const prev = cur;
+    setTimeout(() => slides[prev].classList.remove('exit-left'), 340);
+    if (cur === 6) reset();
+    cur = n;
+    slides[cur].classList.add('active');
+    ui();
+  }
+
+  function nextSlide() { if (cur < total-1) goTo(cur+1); }
+  function prevSlide() { if (cur > 0) goTo(cur-1); }
+
+  document.addEventListener('keydown', e => {
+    if (e.key==='ArrowRight'||e.key==='ArrowDown') nextSlide();
+    if (e.key==='ArrowLeft' ||e.key==='ArrowUp')   prevSlide();
+  });
+
+  let tx = null;
+  document.addEventListener('touchstart', e => tx = e.touches[0].clientX);
+  document.addEventListener('touchend', e => {
+    if (!tx) return;
+    const dx = tx - e.changedTouches[0].clientX;
+    if (Math.abs(dx) > 50) dx > 0 ? nextSlide() : prevSlide();
+    tx = null;
+  });
+
+  function revealSteps() {
+    document.getElementById('revealBtn').style.display = 'none';
+    ['s1','s2','s3','s4','s5'].forEach((id,i) =>
+      setTimeout(() => document.getElementById(id).classList.add('show'), i*160));
+  }
+
+  function reset() {
+    ['s1','s2','s3','s4','s5'].forEach(id => document.getElementById(id).classList.remove('show'));
+    document.getElementById('revealBtn').style.display = 'inline-block';
+  }
+
+  ui();
+</script>
+</body>
+</html>
